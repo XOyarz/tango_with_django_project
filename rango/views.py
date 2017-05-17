@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 @login_required
 def user_logout(request):
@@ -70,9 +71,34 @@ def register(request):
 def index(request):
     category_list = Category.objects.order_by('-likes')[:5]
     context_dict = {'categories':category_list}
-    return render(request, 'rango/index.html', context = context_dict)
+
+    response = render(request, 'rango/index.html', context = context_dict)
+
+    visitor_cookie_handler(request, response)
+
+    return response
+
+#helper method
+def visitor_cookie_handler(request, response):
+    visits = int(request.COOKIES.get('visits', '1'))
+
+    last_visit_cookie = request.COOKIES.get('last_visit', str(datetime.now()))
+    last_visit_time = datetime.strptime(last_visit_cookie[:-7], '%Y-%m-%d %H:%M:%S')
+
+    if (datetime.now() - last_visit_time).seconds > 0:
+        visits = visits + 1
+        response.set_cookie('last_visit', str(datetime.now()))
+    else:
+        visits = 1
+        response.set_cookie('last_visit', last_visit_cookie)
+    response.set_cookie('visits', visits)
+    #return visits
+
 
 def about(request):
+    if request.session.test_cookie_worked():
+        print("TEST COOKIE WORKED")
+        request.session.delete_test_cookie()
     print(request.method)
     print(request.user)
     return render(request, 'rango/about.html', {})
@@ -92,6 +118,7 @@ def show_category(request, category_name_slug):
         context_dict['pages'] = None
     return render(request, 'rango/category.html', context_dict)
 
+@login_required
 def add_category(request):
     form = CategoryForm()
 
