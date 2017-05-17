@@ -1,14 +1,12 @@
-<!DOCTYPE html>
+{% extends 'rango/base.html' %}
 {% load staticfiles %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>About</title>
-</head>
-<body>
+
+{% block title_block %}
+    {{ category.name }}
+{% endblock %}
+
+{% block body_block %}
 
     <div>This page has been put together by XOyarz</div>
-    <a href="/rango/">Back to Index</a><br/>
     <img src="{% static "images/colors.jpg" %}" alt="Picture of colors" />
-</body>
-</html>
+{% endblock %}
