@@ -9,6 +9,16 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from rango.bing_search import run_query
+
+def search(request):
+    result_list = []
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+        if query:
+            result_list = run_query(query)
+    return render(request, 'rango/search.html', {'result_list': result_list})
 
 @login_required
 def user_logout(request):
